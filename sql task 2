@@ -1,0 +1,37 @@
+
+/*USE WINDOW FUNCTIONS,SUBQUERIES, AND CTES (COMMONTABLE EXPRESSIONS) FORADVANCED DATA ANALYSIS*/
+/*window function  to find total sales per customer and includes a ranking based on total quantity purchased.*/
+SELECT 
+    cust_id,
+    SUM(quantity) AS total_quantity,
+    RANK() OVER (ORDER BY SUM(quantity) DESC) AS customer_rank
+FROM sale
+GROUP BY cust_id;
+
+/* CTE  This query identifies the top 3 best-selling products based on total quantity sold */
+WITH product_sales AS (
+    SELECT 
+        p.prod_id, 
+        p.prod_name, 
+        SUM(s.quantity) AS total_sold
+    FROM sale s
+    JOIN products p ON s.prod_id = p.prod_id
+    GROUP BY p.prod_id, p.prod_name
+)
+SELECT 
+    prod_id, 
+    prod_name, 
+    total_sold
+FROM product_sales
+ORDER BY total_sold DESC
+LIMIT 3;
+/*This query calculates a cumulative total of quantity sold for each sale, ordered by sale_date.*/
+SELECT 
+    sale_id,
+    sale_date,
+    cust_id,
+    prod_id,
+    quantity,
+    SUM(quantity) OVER (ORDER BY sale_date) AS running_total
+FROM sale;
+
